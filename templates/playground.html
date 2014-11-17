@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+{% set active_page = "playground" %}
+{% block body %}
+<h1 class="page-header">Playground</h1>
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Have fun with GPIO !</h3>
+  </div>
+  <div class="panel-body">
+    <ul><li><a href="{{ url_for('playground') }}/BOARD/12/ON">GPIO 12 ON Allume moi !</a></li></ul>
+	<ul><li><a href="{{ url_for('playground') }}/BOARD/12/OFF">GPIO 12 OFF</a></li></ul>
+	<ul><li><a href="{{ url_for('playground') }}/GPIO/18/ON">GPIO 18 ON</a></li></ul>
+	<ul><li><a href="{{ url_for('playground') }}/GPIO/18/OFF">GPIO 18 OFF</a></li></ul>
+  </div>
+</div>
+
+
+
+{% endblock %}
