@@ -5,7 +5,8 @@ import datetime
 import os
 import socket
 import subprocess
-import RPi.GPIO as GPIO
+#import RPi.GPIO as GPIO
+import wiringpi2 as wiringpi 
 app = Flask(__name__)
 app.secret_key = 'homeia_rocks'
 
@@ -80,10 +81,13 @@ def playground():
 
 @app.route('/playground/GPIO/<int:gpio_id>/ON')
 def GPIO_ON(gpio_id):
-    GPIO.setmode(GPIO.BCM)
+    wiringpi.wiringPiSetupGpio()  
+    #GPIO.setmode(GPIO.BCM)
     if gpio_id in GPIO_list:
-      GPIO.setup(gpio_id, GPIO.OUT)
-      GPIO.output(gpio_id, True)
+      wiringpi.pinMode(gpio_id, 0)
+      #GPIO.setup(gpio_id, GPIO.OUT)
+      wiringpi.digitalWrite(gpio_id, 1)
+      #GPIO.output(gpio_id, True)
       message = Markup('GPIO <strong>'+ str(gpio_id) +'</strong> switch ON')
       flash(message, 'success')
     else:
@@ -93,39 +97,44 @@ def GPIO_ON(gpio_id):
 
 @app.route('/playground/GPIO/<int:gpio_id>/OFF')
 def GPIO_OFF(gpio_id):
-    GPIO.setmode(GPIO.BCM)
+    wiringpi.wiringPiSetupGpio()  
+    #GPIO.setmode(GPIO.BCM)
     if gpio_id in GPIO_list:
-      GPIO.setup(gpio_id, GPIO.OUT)
-      GPIO.output(gpio_id, False)
+      wiringpi.pinMode(gpio_id, 0)
+      #GPIO.setup(gpio_id, GPIO.OUT)
+      wiringpi.digitalWrite(gpio_id, 0)
+      #GPIO.output(gpio_id, False)
       message = Markup('GPIO <strong>'+ str(gpio_id) +'</strong> switch OFF')
       flash(message, 'success')
     else:
       flash('Invalid GPIO number', 'danger')
     return render_template('playground.html')
 
-@app.route('/playground/BOARD/<int:pin_id>/ON')
-def BOARD_ON(pin_id):
-    GPIO.setmode(GPIO.BOARD)
-    if pin_id in BOARD_list:
-      GPIO.setup(pin_id, GPIO.OUT)
-      GPIO.output(pin_id, True)
-      message = Markup('PIN <strong>'+ str(pin_id) +'</strong> switch ON')
-      flash(message, 'success')
-    else:
-      flash('Invalid Pin number', 'danger')
-    return render_template('playground.html')
+# @app.route('/playground/BOARD/<int:pin_id>/ON')
+# def BOARD_ON(pin_id):
+#     wiringpi.wiringPiSetupGpio()  
+#     #GPIO.setmode(GPIO.BCM)
+#     if pin_id in BOARD_list:
+#       GPIO.setup(pin_id, GPIO.OUT)
+#       GPIO.output(pin_id, True)
+#       message = Markup('PIN <strong>'+ str(pin_id) +'</strong> switch ON')
+#       flash(message, 'success')
+#     else:
+#       flash('Invalid Pin number', 'danger')
+#     return render_template('playground.html')
 
-@app.route('/playground/BOARD/<int:pin_id>/OFF')
-def BOARD_OFF(pin_id):
-    GPIO.setmode(GPIO.BOARD)
-    if pin_id in BOARD_list:
-      GPIO.setup(pin_id, GPIO.OUT)
-      GPIO.output(pin_id, False)
-      message = Markup('PIN <strong>'+ str(pin_id) +'</strong> switch OFF')
-      flash(message, 'success')
-    else:
-      flash('Invalid Pin number', 'danger')
-    return render_template('playground.html')
+# @app.route('/playground/BOARD/<int:pin_id>/OFF')
+# def BOARD_OFF(pin_id):
+#     wiringpi.wiringPiSetupGpio()  
+#     #GPIO.setmode(GPIO.BCM)
+#     if pin_id in BOARD_list:
+#       GPIO.setup(pin_id, GPIO.OUT)
+#       GPIO.output(pin_id, False)
+#       message = Markup('PIN <strong>'+ str(pin_id) +'</strong> switch OFF')
+#       flash(message, 'success')
+#     else:
+#       flash('Invalid Pin number', 'danger')
+#     return render_template('playground.html')
 
 @app.route('/settings')
 def settings():
