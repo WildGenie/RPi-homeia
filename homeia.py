@@ -148,6 +148,26 @@ def wiring(wp_id, wp_state):
       flash('Invalid WiringPi number', 'danger')
     return render_template('playground.html', **wiringData)
 
+@app.route('/playground/i2c/<int:i2cAddr>/<i2cMode>/<int:i2cData>')
+def i2c(i2cAddr, i2cMode, i2cData):
+
+    # i2c = wiringpi2.I2C()
+    # dev = i2c.setup(0x20) ( not sure about what to pass into the setup function, but presumably a device address? )
+    # i2c.read(dev)
+
+    i2c = wiringpi.I2C()
+    dev = i2c.setup(0x20)
+    
+    i2cReturnedData = {
+        'i2cAddress' : i2cAddr,
+        'i2cData' : i2c.read(dev)
+    }
+
+    message = Markup('I2C '+ str(i2cAddr) +' returned : <strong>'+ str(i2cReturnedData.i2cData) +'</strong>')
+    flash(message, 'success')
+
+    return render_template('playground.html', **i2cReturnedData)
+
 # @app.route('/playground/BOARD/<int:pin_id>/ON')
 # def BOARD_ON(pin_id):
 #     wiringpi.wiringPiSetup()  
