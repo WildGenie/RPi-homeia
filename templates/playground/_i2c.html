@@ -14,18 +14,18 @@
 				<option value="read">Write</option>
 			</select>
 		</div>
-		<input type="button" name="go" value="Go!" class="btn btn-primary" onClick="digitalWrite()">
+		<input type="button" name="go" value="Go!" class="btn btn-primary" onClick="I2CAction()">
 
 		<script type="text/javascript">
 		
-		function digitalWrite()
+		function I2CAction()
 		{
 			//var e = document.getElementById("MySelectOption");
 			//var strUser = e.options[e.selectedIndex].value;
 			var I2CDeviceAddress = document.getElementById("I2CDeviceAddress").value;
 		  	var I2CMode = document.getElementById("I2CMode").value;
 			if ( I2CDeviceAddress && I2CDeviceAddress ){
-		  		window.location='{{ url_for('playground') }}/i2c/'+ I2CDeviceAddress +'/'+ I2CMode;
+		  		window.location='{{ url_for('playground') }}/i2c/'+ I2CDeviceAddress +'/'+ I2CMode + '/';
 			}
 			else {
 				alert('wrong parameters');

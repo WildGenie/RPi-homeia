@@ -31,7 +31,7 @@
 			var wiringPiPin = document.getElementById("wiringPiPin").value;
 		  	var wiringPiState = document.getElementById("wiringPiState").value;
 			if ( wiringPiPin && wiringPiState ){
-		  		window.location='{{ url_for('playground') }}/wiring/'+ wiringPiPin +'/'+ wiringPiState +'/'+;
+		  		window.location='{{ url_for('playground') }}/wiring/'+ wiringPiPin +'/'+ wiringPiState;
 			}
 			else {
 				alert('wrong parameters');

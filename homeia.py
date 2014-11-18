@@ -112,30 +112,6 @@ def sysinfos():
 def playground():
    return render_template('playground.html', **wiringData)
 
-@app.route('/playground/GPIO/<int:gpio_id>/ON')
-def GPIO_ON(gpio_id):
-    wiringpi.wiringPiSetupGpio()  
-    if gpio_id in GPIO_list:
-      wiringpi.pinMode(gpio_id, 1)
-      wiringpi.digitalWrite(gpio_id, 1)
-      message = Markup('GPIO <strong>'+ str(gpio_id) +'</strong> switch ON')
-      flash(message, 'success')
-    else:
-      flash('Invalid GPIO number', 'danger')
-    return render_template('playground.html')
-
-@app.route('/playground/GPIO/<int:gpio_id>/OFF')
-def GPIO_OFF(gpio_id):
-    wiringpi.wiringPiSetupGpio()  
-    if gpio_id in GPIO_list:
-      wiringpi.pinMode(gpio_id, 1)
-      wiringpi.digitalWrite(gpio_id, 0)
-      message = Markup('GPIO <strong>'+ str(gpio_id) +'</strong> switch OFF')
-      flash(message, 'success')
-    else:
-      flash('Invalid GPIO number', 'danger')
-    return render_template('playground.html')
-
 @app.route('/playground/wiring/<int:wp_id>/<int:wp_state>')
 def wiring(wp_id, wp_state):
     wiringpi.wiringPiSetup()  
@@ -149,7 +125,7 @@ def wiring(wp_id, wp_state):
     return render_template('playground.html', **wiringData)
 
 @app.route('/playground/i2c/<int:i2cAddr>/<i2cMode>/<int:i2cData>')
-def i2c(i2cAddr, i2cMode, i2cData):
+def i2c(i2cAddr, i2cMode, i2cData=None):
 
     # i2c = wiringpi2.I2C()
     # dev = i2c.setup(0x20) ( not sure about what to pass into the setup function, but presumably a device address? )
@@ -160,39 +136,14 @@ def i2c(i2cAddr, i2cMode, i2cData):
     
     i2cReturnedData = {
         'i2cAddress' : i2cAddr,
-        'i2cData' : i2c.read(dev)
+        #'i2cData' : i2c.read(dev)
+        'i2cData' : 'returned data by I2C device'
     }
 
-    message = Markup('I2C '+ str(i2cAddr) +' returned : <strong>'+ str(i2cReturnedData.i2cData) +'</strong>')
+    message = Markup('I2C '+ str(i2cAddr) +' returned : <strong>'+ '(not implemented yet)' +'</strong>')
     flash(message, 'success')
 
     return render_template('playground.html', **i2cReturnedData)
-
-# @app.route('/playground/BOARD/<int:pin_id>/ON')
-# def BOARD_ON(pin_id):
-#     wiringpi.wiringPiSetup()  
-#     #GPIO.setmode(GPIO.BCM)
-#     if pin_id in BOARD_list:
-#       GPIO.setup(pin_id, GPIO.OUT)
-#       GPIO.output(pin_id, True)
-#       message = Markup('PIN <strong>'+ str(pin_id) +'</strong> switch ON')
-#       flash(message, 'success')
-#     else:
-#       flash('Invalid Pin number', 'danger')
-#     return render_template('playground.html')
-
-# @app.route('/playground/BOARD/<int:pin_id>/OFF')
-# def BOARD_OFF(pin_id):
-#     wiringpi.wiringPiSetup()  
-#     #GPIO.setmode(GPIO.BCM)
-#     if pin_id in BOARD_list:
-#       GPIO.setup(pin_id, GPIO.OUT)
-#       GPIO.output(pin_id, False)
-#       message = Markup('PIN <strong>'+ str(pin_id) +'</strong> switch OFF')
-#       flash(message, 'success')
-#     else:
-#       flash('Invalid Pin number', 'danger')
-#     return render_template('playground.html')
 
 @app.route('/settings')
 def settings():
