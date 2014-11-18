@@ -25,6 +25,8 @@
               <ul class="dropdown-menu" role="menu">
                 <li><a onclick="return confirm('Confirm reboot')" href="{{ url_for('reboot') }}">Reboot</a></li>
                 <li><a onclick="return confirm('Confirm shutdown')" href="{{ url_for('shutdown') }}">Shut down</a></li>
+                <li role="presentation" class="divider"></li>
+                <li><a onclick="return confirm('Confirm shutdown homeia server')" href="{{ url_for('stopserver') }}">stop server</a></li>
               </ul>
             </li>
           </ul>
