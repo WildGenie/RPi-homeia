@@ -171,15 +171,5 @@ def stopserver():
     shutdown_server()
     return 'Server shutting down...'
 
-# @app.route("/18/off")
-# def action18off():
-#     GPIO.output(12, False)
-#     message = "GPIO 18 was turned off."
-#     templateData = {
-#         'message' : message,
-#         'time' : timeString
-#     }
-#     return render_template('playground.html', **templateData)
-
 if __name__ == "__main__":
    app.run(host='0.0.0.0', port=8080, debug=True)
