@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from functools import wraps
-from flask import Flask, Markup, flash, render_template, redirect, url_for, jsonify, request, Response
+from flask import Flask, Markup, flash, render_template, redirect, url_for, jsonify, g, request, Response
 from datetime import timedelta
 import sqlite3
 import datetime
@@ -10,44 +10,50 @@ import miniupnpc
 import subprocess
 import wiringpi2 as wiringpi 
 app = Flask(__name__)
-app.config.from_envvar('/config/config.py', silent=True)
+
+app.config.update(dict(
+    DATABASE=os.path.join(app.root_path, 'db/homeia.db'),
+    DEBUG=True,
+    SECRET_KEY='homeia_rocks',
+    USERNAME='admin',
+    PASSWORD='admin',
+    WEBPORT=8080
+))
+app.config.from_envvar('HOMEIA_SETTINGS', silent=True)
 
 
-
-app.secret_key = 'homeia_rocks'
-homeiaPort = 8080
-
-#UPNP setting up
-u = miniupnpc.UPnP()
-print 'inital(default) values :'
-print ' discoverdelay', u.discoverdelay
-print ' lanaddr', u.lanaddr
-print ' multicastif', u.multicastif
-print ' minissdpdsocket', u.minissdpdsocket
-u.discoverdelay = 200;
-#u.minissdpdsocket = '../minissdpd/minissdpd.sock'
-# discovery process, it usualy takes several seconds (2 seconds or more)
-print 'Discovering... delay=%ums' % u.discoverdelay
-print u.discover(), 'device(s) detected'
-# select an igd
-try:
-  u.selectigd()
-except Exception, e:
-  print 'Exception :', e
-  sys.exit(1)
-# display information about the IGD and the internet connection
-print 'local ip address :', u.lanaddr
-print 'external ip address :', u.externalipaddress()
-print u.statusinfo(), u.connectiontype()
-print u.addportmapping(homeiaPort, 'TCP', u.lanaddr, homeiaPort, 'HOMEIA Web server', '')
-#END UPNP setting up
+def initUPNP():
+  #UPNP setting up
+  u = miniupnpc.UPnP()
+  print 'inital(default) values :'
+  print ' discoverdelay', u.discoverdelay
+  print ' lanaddr', u.lanaddr
+  print ' multicastif', u.multicastif
+  print ' minissdpdsocket', u.minissdpdsocket
+  u.discoverdelay = 200;
+  #u.minissdpdsocket = '../minissdpd/minissdpd.sock'
+  # discovery process, it usualy takes several seconds (2 seconds or more)
+  print 'Discovering... delay=%ums' % u.discoverdelay
+  print u.discover(), 'device(s) detected'
+  # select an igd
+  try:
+    u.selectigd()
+  except Exception, e:
+    print 'Exception :', e
+    sys.exit(1)
+  # display information about the IGD and the internet connection
+  print 'local ip address :', u.lanaddr
+  print 'external ip address :', u.externalipaddress()
+  print u.statusinfo(), u.connectiontype()
+  print u.addportmapping(app.config['WEBPORT'], 'TCP', u.lanaddr, app.config['WEBPORT'], 'HOMEIA Web server', '')
+  #END UPNP setting up
 
 
 def check_auth(username, password):
     """This function is called to check if a username /
     password combination is valid.
     """
-    return username == 'admin' and password == 'admin'
+    return username == app.config['USERNAME'] and password == app.config['PASSWORD']
 
 def authenticate():
     """Sends a 401 response that enables basic auth"""
@@ -85,7 +91,7 @@ def getLanIPAddress():
     data = p.communicate()
     split_data = data[0].split()
     ipaddr = split_data[split_data.index('src')+1]
-    return ipaddr
+    return(ipaddr)
 
 def getWanIPAddress():
     try:
@@ -109,7 +115,6 @@ def getLastReboot():
     uptime_string = str(timedelta(seconds = uptime_seconds))
     return(uptime_string)
 
-
 GPIO_list =  [4, 17, 18, 21, 22, 23, 24, 25]
 BOARD_list = [7, 11, 12, 13, 15, 16, 18, 22]
 WIRINGPI_list = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 14, 15, 16, 17]
@@ -118,6 +123,9 @@ wiringData = {
       'wiring_pin_mode' : [0, 1],
       'wiring_pin_states' : [{'label' : 'Off', 'value' : 0}, {'label' : 'On', 'value' : 1}]
     }
+
+#settings = getSettings()
+#app.config.update(WEBPORT=settings['WEBPORT'])
 
 @app.route("/")
 @requires_auth
@@ -183,22 +191,24 @@ def i2c(i2cAddr, i2cMode, i2cData=None):
 
 @app.route('/settings')
 def settings():
+    settings = getSettings()
     settings_parameters = {
     'hostname' : socket.gethostname(),
-    'ip_adress' : getLanIPAddress()
+    'ip_adress' : getLanIPAddress(),
+    'webport' : 8080
     }
     return render_template('settings.html', **settings_parameters)
 
 @app.route('/reboot')
 def reboot():
-    print u.deleteportmapping(homeiaPort, 'TCP')
+    print u.deleteportmapping(app.config['WEBPORT'], 'TCP')
     flash('System is rebooting', 'warning')
     os.system("sudo shutdown -r now")
     return redirect(url_for('overview'))
 
 @app.route('/shutdown')
 def shutdown():
-    print u.deleteportmapping(homeiaPort, 'TCP')
+    print u.deleteportmapping(app.config['WEBPORT'], 'TCP')
     flash('System is shuting down', 'warning')
     os.system("sudo shutdown -h now")
     return redirect(url_for('overview'))
@@ -206,9 +216,9 @@ def shutdown():
 
 @app.route('/stopserver')
 def stopserver():
-    print u.deleteportmapping(homeiaPort, 'TCP')
+    print u.deleteportmapping(app.config['WEBPORT'], 'TCP')
     shutdown_server()
     return 'Server shutting down...'
 
 if __name__ == "__main__":
-   app.run(host='0.0.0.0', port=homeiaPort, debug=True)
+   app.run(host='0.0.0.0', port=app.config['WEBPORT'], debug=True)
