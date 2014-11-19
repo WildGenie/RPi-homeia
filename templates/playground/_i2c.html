@@ -1,0 +1,50 @@
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Have fun with I2C !</h3>
+  </div>
+  <div class="panel-body">
+	<form role="form" class="form-inline">
+		<div class="form-group">
+			<input type="text" id="I2CDeviceAddress" class="form-control" placeholder="Enter I2C Address">
+		</div>
+		<div class="form-group">
+			<select id="I2CMode" class="form-control">
+			<option value="" selected disabled>Mode (R/W)</option>
+				<option value="read">Read</option>
+				<option value="read">Write</option>
+			</select>
+		</div>
+		<input type="button" name="go" value="Go!" class="btn btn-primary" onClick="I2CAction()">
+
+		<script type="text/javascript">
+		
+		function I2CAction()
+		{
+			var I2CDeviceAddress = document.getElementById("I2CDeviceAddress").value;
+		  	var I2CMode = document.getElementById("I2CMode").value;
+			if ( I2CDeviceAddress && I2CDeviceAddress ){
+		  		window.location='{{ url_for('playground') }}/i2c/'+ I2CDeviceAddress +'/'+ I2CMode + '/';
+			}
+			else {
+				alert('wrong parameters');
+			}
+		}
+
+		// jQuery style
+		/*
+		    $(function(){
+		      // bind change event to select
+		      $('#dynamic_select').bind('change', function () {
+		          var url = $(this).val(); // get selected value
+		          if (url) { // require a URL
+		              window.location = url; // redirect
+		          }
+		          return false;
+		      });
+		    });
+		*/
+
+		</script>
+	</form>
+  </div>
+ </div>
