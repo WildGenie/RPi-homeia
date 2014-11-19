@@ -191,7 +191,6 @@ def i2c(i2cAddr, i2cMode, i2cData=None):
 
 @app.route('/settings')
 def settings():
-    settings = getSettings()
     settings_parameters = {
     'hostname' : socket.gethostname(),
     'ip_adress' : getLanIPAddress(),
