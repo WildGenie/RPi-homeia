@@ -2,13 +2,46 @@
 from functools import wraps
 from flask import Flask, Markup, flash, render_template, redirect, url_for, jsonify, request, Response
 from datetime import timedelta
+import sqlite3
 import datetime
 import os
 import socket
+import miniupnpc
 import subprocess
 import wiringpi2 as wiringpi 
 app = Flask(__name__)
+app.config.from_envvar('/config/config.py', silent=True)
+
+
+
 app.secret_key = 'homeia_rocks'
+homeiaPort = 8080
+
+#UPNP setting up
+u = miniupnpc.UPnP()
+print 'inital(default) values :'
+print ' discoverdelay', u.discoverdelay
+print ' lanaddr', u.lanaddr
+print ' multicastif', u.multicastif
+print ' minissdpdsocket', u.minissdpdsocket
+u.discoverdelay = 200;
+#u.minissdpdsocket = '../minissdpd/minissdpd.sock'
+# discovery process, it usualy takes several seconds (2 seconds or more)
+print 'Discovering... delay=%ums' % u.discoverdelay
+print u.discover(), 'device(s) detected'
+# select an igd
+try:
+  u.selectigd()
+except Exception, e:
+  print 'Exception :', e
+  sys.exit(1)
+# display information about the IGD and the internet connection
+print 'local ip address :', u.lanaddr
+print 'external ip address :', u.externalipaddress()
+print u.statusinfo(), u.connectiontype()
+print u.addportmapping(homeiaPort, 'TCP', u.lanaddr, homeiaPort, 'HOMEIA Web server', '')
+#END UPNP setting up
+
 
 def check_auth(username, password):
     """This function is called to check if a username /
@@ -55,7 +88,10 @@ def getLanIPAddress():
     return ipaddr
 
 def getWanIPAddress():
-    res = os.popen("curl -s http://ipecho.net/plain").readline()
+    try:
+      res = os.popen("curl -s http://ipecho.net/plain").readline()
+    except:
+      res = u.externalipaddress()
     return(res)
 
 def getCPUtemperature():
@@ -155,12 +191,14 @@ def settings():
 
 @app.route('/reboot')
 def reboot():
+    print u.deleteportmapping(homeiaPort, 'TCP')
     flash('System is rebooting', 'warning')
     os.system("sudo shutdown -r now")
     return redirect(url_for('overview'))
 
 @app.route('/shutdown')
 def shutdown():
+    print u.deleteportmapping(homeiaPort, 'TCP')
     flash('System is shuting down', 'warning')
     os.system("sudo shutdown -h now")
     return redirect(url_for('overview'))
@@ -168,8 +206,9 @@ def shutdown():
 
 @app.route('/stopserver')
 def stopserver():
+    print u.deleteportmapping(homeiaPort, 'TCP')
     shutdown_server()
     return 'Server shutting down...'
 
 if __name__ == "__main__":
-   app.run(host='0.0.0.0', port=8080, debug=True)
+   app.run(host='0.0.0.0', port=homeiaPort, debug=True)
