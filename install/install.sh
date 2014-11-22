@@ -11,7 +11,9 @@ if [ "$(id -u)" != "0" ]; then
 fi
 apt-get update
 apt-get install python-pip
-pip install flask
+pip install flask 
+pip install Flask-SQLAlchemy
+pip install flask-wtf
 
 #git clone https://github.com/miniupnp/miniupnp.git
 #cd ~/miniupnp/miniupnpc
