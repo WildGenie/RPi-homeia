@@ -31,14 +31,17 @@ def index():
 
 @playground_blueprint.route('/wiring/<int:wp_id>/<int:wp_state>')
 def wiring(wp_id, wp_state):
-    wiringpi.wiringPiSetup()  
+    wiringpi.wiringPiSetup()
     if wp_id in WIRINGPI_list:
-      wiringpi.pinMode(wp_id, 1)
-      wiringpi.digitalWrite(wp_id, wp_state)
-      message = Markup('GPIO <strong>'+ str(wp_id) +'</strong> switched to : '+ str(wp_state))
-      flash(message, 'success')
+        wiringpi.pinMode(wp_id, 1)
+        wiringpi.digitalWrite(wp_id, wp_state)
+        message = Markup(
+            f'GPIO <strong>{str(wp_id)}</strong> switched to : {str(wp_state)}'
+        )
+
+        flash(message, 'success')
     else:
-      flash('Invalid WiringPi number', 'danger')
+        flash('Invalid WiringPi number', 'danger')
     return render_template('playground/index.html', **wiringData)
 
 @playground_blueprint.route('/i2c/<int:i2cAddr>/<i2cMode>/<int:i2cData>')
@@ -50,14 +53,18 @@ def i2c(i2cAddr, i2cMode, i2cData=None):
 
     i2c = wiringpi.I2C()
     dev = i2c.setup(0x20)
-    
+
     i2cReturnedData = {
         'i2cAddress' : i2cAddr,
         #'i2cData' : i2c.read(dev)
         'i2cData' : 'returned data by I2C device'
     }
 
-    message = Markup('I2C '+ str(i2cAddr) +' returned : <strong>'+ '(not implemented yet)' +'</strong>')
+    message = Markup(
+        f'I2C {str(i2cAddr)} returned : <strong>(not implemented yet)'
+        + '</strong>'
+    )
+
     flash(message, 'success')
 
     return render_template('playground/index.html', **i2cReturnedData)
